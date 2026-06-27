@@ -1,0 +1,113 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "description": "Enter the host or IP address of your APR EVSE. No credentials are required.",
+        "data": {
+          "host": "Host or IP address",
+          "port": "Port"
+        }
+      },
+      "zeroconf_confirm": {
+        "title": "APR EVSE",
+        "description": "Do you want to set up {name}?"
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the device."
+    },
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "cannot_connect": "Failed to connect to the device.",
+      "not_apr_evse": "The discovered device is not an APR EVSE.",
+      "no_mac": "The discovered device did not advertise a MAC address."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "WebSocket push is used for live updates; the poll interval is the fallback when the socket is down. Charging-current minimum is {amps_min} A.",
+        "data": {
+          "scan_interval": "Poll fallback interval (seconds)",
+          "amps_max": "Max charging current override (A, 0 = use device maximum)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "evse_status": {
+        "name": "Status",
+        "state": {
+          "starting": "Starting",
+          "not_connected": "Not connected",
+          "connected": "Connected",
+          "charging": "Charging",
+          "vent_required": "Vent required",
+          "diode_check_failed": "Diode check failed",
+          "gfi_fault": "GFI fault",
+          "no_ground": "No ground",
+          "stuck_relay": "Stuck relay",
+          "gfi_self_test_failed": "GFI self-test failed",
+          "over_temperature": "Over temperature",
+          "under_voltage": "Under voltage",
+          "over_current": "Over current",
+          "evse_over_temperature": "EVSE over temperature",
+          "fault": "Fault",
+          "sleeping": "Sleeping",
+          "disabled": "Disabled"
+        }
+      },
+      "charging_power": { "name": "Charging power" },
+      "session_energy": { "name": "Session energy" },
+      "session_duration": { "name": "Session duration" },
+      "session_cost": { "name": "Session cost" },
+      "range_added": { "name": "Range added" },
+      "voltage": { "name": "Voltage" },
+      "temperature": { "name": "Temperature" },
+      "grid_power": { "name": "Grid power" },
+      "price": { "name": "Electricity price" },
+      "car_soc": { "name": "Car SOC" },
+      "powerwall_soc": { "name": "Powerwall SOC" },
+      "pv_power": { "name": "PV power" },
+      "rssi": { "name": "Wi-Fi signal" },
+      "uptime": { "name": "Uptime" },
+      "free_ram": { "name": "Free RAM" },
+      "fs_free": { "name": "Filesystem free" },
+      "grid_meter_state": {
+        "name": "Grid meter",
+        "state": { "ok": "OK", "nok": "Error", "dis": "Disabled" }
+      },
+      "energy_meter_state": {
+        "name": "Energy meter",
+        "state": { "ok": "OK", "nok": "Error", "dis": "Disabled" }
+      }
+    },
+    "binary_sensor": {
+      "vehicle_connected": { "name": "Vehicle connected" },
+      "charging": { "name": "Charging" },
+      "fault": { "name": "Fault" },
+      "mqtt_connected": { "name": "Cloud connected" }
+    },
+    "number": {
+      "charging_current": { "name": "Charging current" },
+      "current_limit": { "name": "Maximum charging current" }
+    },
+    "select": {
+      "charge_mode": {
+        "name": "Charge mode",
+        "state": { "normal": "Normal", "solar": "Solar" }
+      },
+      "schedule": {
+        "name": "Schedule",
+        "state": { "off": "Off", "scheduler": "Scheduler" }
+      }
+    },
+    "switch": {
+      "charging_enabled": { "name": "Charging enabled" },
+      "use_car_soc": { "name": "Use car SOC" },
+      "use_price_forecast": { "name": "Use price forecast" }
+    }
+  }
+}
