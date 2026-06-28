@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, UnitOfElectricCurrent
+from homeassistant.const import UnitOfElectricCurrent
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -88,10 +88,12 @@ class AprEvseCurrentLimit(_AprEvseAmpsNumber):
 
     The ceiling for ``amps``; itself bounded by the device's configured
     ``max_evse_amps``. Lowering it below the live current pulls the current down.
+
+    Exposed as a control (no CONFIG category) so it sits alongside the live
+    charging current rather than under the device's Configuration section.
     """
 
     _attr_translation_key = "current_limit"
-    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(self, coordinator: AprEvseCoordinator) -> None:
         super().__init__(coordinator, "current_limit")

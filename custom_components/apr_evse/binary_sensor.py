@@ -65,7 +65,6 @@ BINARY_SENSORS: tuple[AprEvseBinarySensorEntityDescription, ...] = (
         translation_key="mqtt_connected",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         entity_category=EntityCategory.DIAGNOSTIC,
-        entity_registry_enabled_default=False,
         is_on_fn=lambda e: e.st("mqtt").get("state") == "connected",
     ),
 )
