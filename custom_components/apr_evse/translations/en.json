@@ -90,7 +90,10 @@
     "binary_sensor": {
       "vehicle_connected": { "name": "Vehicle connected" },
       "charging": { "name": "Charging" },
-      "fault": { "name": "Fault" },
+      "fault": {
+        "name": "Fault",
+        "state": { "off": "No Fault", "on": "Fault" }
+      },
       "mqtt_connected": { "name": "Cloud connected" }
     },
     "number": {
