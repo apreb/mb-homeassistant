@@ -20,8 +20,6 @@ Local-push HACS custom integration for the APR EVSE smart charger. Talks to the 
 
 Example: [`examples/dashboard.yaml`](examples/dashboard.yaml). Conditional sections (car / powerwall / PV) auto-hide where the data isn't reported. Change device name `apr_evse` to your own, you can find device slug here: Settings → Devices & Services → APR EVSE → click the device → click any entity → the entity ID is shown 
 
-## Options
+## Want one?
 
-- **Poll fallback interval** (default 30 s) — REST poll used when the WebSocket is down; also clears stale conditional sections.
-
-
+You love homeassistant so much that you want this EVSE just for the integration? Do reachout to me at https://ww2.missingbolt.com/
