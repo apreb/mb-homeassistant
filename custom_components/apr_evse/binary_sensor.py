@@ -21,10 +21,8 @@ from .entity import AprEvseEntity
 
 
 def _vehicle_connected(e: "AprEvseBinarySensor") -> bool | None:
-    s = e.evse_state
-    if s is None:
-        return None
-    return 2 <= s <= 14  # plugged states + fault states (exclude sleep/disabled)
+    c = e.st("evse").get("connected")  # 0=disconnected, 1=connected, 2=unknown
+    return None if c not in (0, 1) else c == 1
 
 
 def _charging(e: "AprEvseBinarySensor") -> bool | None:
