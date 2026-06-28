@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CMD_CAR_SOC, CMD_FORECAST, CMD_STATE, DOMAIN
+from .const import CMD_CAR_SOC, CMD_STATE, DOMAIN
 from .coordinator import AprEvseCoordinator
 from .entity import AprEvseEntity
 
@@ -22,7 +22,6 @@ async def async_setup_entry(
         [
             AprEvseChargingSwitch(coordinator),
             AprEvseCarSocSwitch(coordinator),
-            AprEvseForecastSwitch(coordinator),
         ]
     )
 
@@ -73,27 +72,3 @@ class AprEvseCarSocSwitch(AprEvseEntity, SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self.coordinator.api.async_control({CMD_CAR_SOC: 0})
         await self.coordinator.async_request_refresh()
-
-
-class AprEvseForecastSwitch(AprEvseEntity, SwitchEntity):
-
-    _attr_translation_key = "use_price_forecast"
-    _attr_assumed_state = True
-
-    def __init__(self, coordinator: AprEvseCoordinator) -> None:
-        super().__init__(coordinator, "use_price_forecast")
-        self._attr_is_on = None
-
-    @property
-    def is_on(self) -> bool | None:
-        return self._attr_is_on
-
-    async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.coordinator.api.async_control({CMD_FORECAST: 1})
-        self._attr_is_on = True
-        self.async_write_ha_state()
-
-    async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.coordinator.api.async_control({CMD_FORECAST: 0})
-        self._attr_is_on = False
-        self.async_write_ha_state()

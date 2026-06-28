@@ -34,7 +34,6 @@ CMD_PAMPS: Final = "pamps"
 CMD_MODE: Final = "mode"
 CMD_SCHEDULE: Final = "schedule"
 CMD_CAR_SOC: Final = "car_soc_toggle"
-CMD_FORECAST: Final = "forecast_toggle"
 
 EVSE_STATE_STARTING: Final = (-2, 0)
 EVSE_STATE_CHARGING: Final = 3
