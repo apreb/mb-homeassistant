@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, UnitOfElectricCurrent
+from homeassistant.const import UnitOfElectricCurrent
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -77,7 +77,6 @@ class AprEvseChargingCurrent(_AprEvseAmpsNumber):
 class AprEvseCurrentLimit(_AprEvseAmpsNumber):
 
     _attr_translation_key = "current_limit"
-    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(self, coordinator: AprEvseCoordinator) -> None:
         super().__init__(coordinator, "current_limit")

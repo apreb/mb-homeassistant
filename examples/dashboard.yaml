@@ -1,0 +1,228 @@
+# APR EVSE — example dashboard
+#
+# Paste into a new dashboard: Settings → Dashboards → + Add → Edit (top-right)
+# → ⋮ → Raw configuration editor → replace all.
+#
+# ENTITY IDs: this assumes a device slug of `apr_evse`. Yours depends on the
+# device name set at setup — check Settings → Devices & Services → APR EVSE →
+# any entity. Find/replace `apr_evse` with your slug if different.
+#
+# CONDITIONAL DATA: not every charger reports car / powerwall / PV. Those
+# sections use `visibility` conditions, so they disappear automatically on
+# devices that don't send that data — no broken cards. The Charging session
+# section only appears while a session is active.
+#
+# DIAGNOSTICS: the diagnostic entities (Wi-Fi signal, uptime, RAM, filesystem,
+# meter states, Cloud connected) are all enabled by default and grouped under
+# the device's Diagnostic section. The car/powerwall/PV sensors are enabled too
+# but stay unavailable until the device reports that data.
+
+title: APR EVSE
+views:
+  - title: Charger
+    path: charger
+    type: sections
+    max_columns: 3
+    sections:
+      # ── Status & control ────────────────────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Status & control
+            heading_style: title
+
+          - type: tile
+            entity: sensor.apr_evse_status
+            name: Status
+
+          - type: tile
+            entity: binary_sensor.apr_evse_vehicle_connected
+            name: Vehicle
+            color: blue
+
+          - type: tile
+            entity: binary_sensor.apr_evse_charging
+            name: Charging
+            color: green
+
+          - type: tile
+            entity: binary_sensor.apr_evse_fault
+            name: Fault
+            color: red
+
+          - type: entities
+            title: Controls
+            show_header_toggle: false
+            entities:
+              - entity: switch.apr_evse_charging_enabled
+                name: Charging enabled
+              - entity: select.apr_evse_charge_mode
+                name: Charge mode
+              - entity: select.apr_evse_schedule
+                name: Schedule
+              - entity: switch.apr_evse_use_price_forecast
+                name: Use price forecast
+              - type: section
+              - entity: number.apr_evse_charging_current
+                name: Charging current
+              - entity: number.apr_evse_maximum_charging_current
+                name: Maximum current
+
+      # ── Live metrics ────────────────────────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Live
+            heading_style: title
+
+          - type: gauge
+            entity: sensor.apr_evse_charging_power
+            name: Charging power
+            unit: W
+            min: 0
+            max: 22000
+            needle: true
+            severity:
+              green: 1
+              yellow: 0
+              red: 0
+
+          - type: tile
+            entity: sensor.apr_evse_voltage
+            name: Voltage
+
+          - type: tile
+            entity: sensor.apr_evse_current
+            name: Current
+
+          - type: tile
+            entity: sensor.apr_evse_temperature
+            name: Temperature
+
+          - type: tile
+            entity: sensor.apr_evse_grid_power
+            name: Grid power
+
+          - type: tile
+            entity: sensor.apr_evse_grid_voltage
+            name: Grid voltage
+
+          - type: tile
+            entity: sensor.apr_evse_grid_current
+            name: Grid current
+
+          - type: tile
+            entity: sensor.apr_evse_electricity_price
+            name: Price
+
+      # ── Charging session (visible only while charging) ──────────────────
+      - type: grid
+        visibility:
+          - condition: state
+            entity: binary_sensor.apr_evse_charging
+            state: "on"
+        cards:
+          - type: heading
+            heading: Charging session
+            heading_style: title
+
+          - type: tile
+            entity: sensor.apr_evse_session_energy
+            name: Energy
+
+          - type: tile
+            entity: sensor.apr_evse_session_duration
+            name: Duration
+
+          - type: tile
+            entity: sensor.apr_evse_session_cost
+            name: Cost
+
+          - type: tile
+            entity: sensor.apr_evse_range_added
+            name: Range added
+
+      # ── Car (only on chargers that report car SOC) ──────────────────────
+      - type: grid
+        visibility:
+          - condition: state
+            entity: sensor.apr_evse_car_soc
+            state_not: unavailable
+          - condition: state
+            entity: sensor.apr_evse_car_soc
+            state_not: unknown
+        cards:
+          - type: heading
+            heading: Car
+            heading_style: title
+
+          - type: gauge
+            entity: sensor.apr_evse_car_soc
+            name: Car SOC
+            unit: "%"
+            min: 0
+            max: 100
+            needle: true
+            severity:
+              red: 0
+              yellow: 20
+              green: 60
+
+          - type: tile
+            entity: switch.apr_evse_use_car_soc
+            name: Use car SOC
+
+      # ── Solar & Powerwall (only on chargers that report pw data) ────────
+      - type: grid
+        visibility:
+          - condition: state
+            entity: sensor.apr_evse_powerwall_soc
+            state_not: unavailable
+          - condition: state
+            entity: sensor.apr_evse_powerwall_soc
+            state_not: unknown
+        cards:
+          - type: heading
+            heading: Solar & Powerwall
+            heading_style: title
+
+          - type: gauge
+            entity: sensor.apr_evse_powerwall_soc
+            name: Powerwall SOC
+            unit: "%"
+            min: 0
+            max: 100
+            needle: true
+            severity:
+              red: 0
+              yellow: 20
+              green: 60
+
+          - type: tile
+            entity: sensor.apr_evse_pv_power
+            name: PV power
+
+      # ── Diagnostics (enable these entities on the device page first) ────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Diagnostics
+            heading_style: subtitle
+
+          - type: entities
+            show_header_toggle: false
+            entities:
+              - entity: binary_sensor.apr_evse_cloud_connected
+                name: Cloud connected
+              - entity: sensor.apr_evse_wi_fi_signal
+                name: Wi-Fi signal
+              - entity: sensor.apr_evse_uptime
+                name: Uptime
+              - entity: sensor.apr_evse_free_ram
+                name: Free RAM
+              - entity: sensor.apr_evse_filesystem_free
+                name: Filesystem free
+              - entity: sensor.apr_evse_grid_meter
+                name: Grid meter
+              - entity: sensor.apr_evse_energy_meter
+                name: Energy meter
