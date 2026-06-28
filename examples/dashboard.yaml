@@ -60,8 +60,6 @@ views:
                 name: Charge mode
               - entity: select.apr_evse_schedule
                 name: Schedule
-              - entity: switch.apr_evse_use_price_forecast
-                name: Use price forecast
               - type: section
               - entity: number.apr_evse_charging_current
                 name: Charging current

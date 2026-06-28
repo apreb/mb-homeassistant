@@ -109,8 +109,7 @@
     },
     "switch": {
       "charging_enabled": { "name": "Charging enabled" },
-      "use_car_soc": { "name": "Use car SOC" },
-      "use_price_forecast": { "name": "Use price forecast" }
+      "use_car_soc": { "name": "Use car SOC" }
     }
   }
 }

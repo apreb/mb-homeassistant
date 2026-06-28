@@ -43,7 +43,6 @@ CMD_PAMPS: Final = "pamps"  # user-defined current ceiling (6..max_evse_amps)
 CMD_MODE: Final = "mode"
 CMD_SCHEDULE: Final = "schedule"
 CMD_CAR_SOC: Final = "car_soc_toggle"
-CMD_FORECAST: Final = "forecast_toggle"
 
 # evse.state enum -> HA status slug (translation key `evse_status`)
 EVSE_STATE_STARTING: Final = (-2, 0)
