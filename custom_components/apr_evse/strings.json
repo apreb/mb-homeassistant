@@ -85,7 +85,9 @@
       "energy_meter_state": {
         "name": "Energy meter",
         "state": { "ok": "OK", "nok": "Error", "dis": "Disabled" }
-      }
+      },
+      "mac_address": { "name": "MAC address" },
+      "firmware_version": { "name": "Firmware version" }
     },
     "binary_sensor": {
       "vehicle_connected": { "name": "Vehicle connected" },

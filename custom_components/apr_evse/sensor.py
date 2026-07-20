@@ -249,6 +249,20 @@ SENSORS: tuple[AprEvseSensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda e: e.st("energy").get("state"),
     ),
+    AprEvseSensorEntityDescription(
+        key="mac_address",
+        translation_key="mac_address",
+        icon="mdi:network",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda e: e._mac,
+    ),
+    AprEvseSensorEntityDescription(
+        key="firmware_version",
+        translation_key="firmware_version",
+        icon="mdi:chip",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda e: e.st("sys").get("firmware"),
+    ),
 )
 
 
