@@ -180,8 +180,8 @@ SENSORS: tuple[AprEvseSensorEntityDescription, ...] = (
         available_fn=lambda e: e.has_state("car"),
     ),
     AprEvseSensorEntityDescription(
-        key="powerwall_soc",
-        translation_key="powerwall_soc",
+        key="home_battery_soc",
+        translation_key="home_battery_soc",
         device_class=SensorDeviceClass.BATTERY,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,

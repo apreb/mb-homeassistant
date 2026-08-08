@@ -27,10 +27,21 @@
   "options": {
     "step": {
       "init": {
-        "description": "WebSocket push is used for live updates; the poll interval is the fallback when the socket is down. Charging-current minimum is {amps_min} A.",
+        "description": "WebSocket push is used for live updates; the poll interval is the fallback when the socket is down. Charging-current minimum is {amps_min} A.\n\nThe sensors below are optional: pick them and this charger receives their values automatically, no automation needed. Values are sent as soon as a sensor changes; the home battery send interval only sets how often they are repeated.",
         "data": {
           "scan_interval": "Poll fallback interval (seconds)",
-          "amps_max": "Max charging current override (A, 0 = use device maximum)"
+          "car_soc_entity": "Car battery level (%)",
+          "home_battery_soc_entity": "Home battery level (%)",
+          "home_battery_amps_entity": "Inverter current (A, signed)",
+          "home_battery_interval": "Home battery send interval (seconds)",
+          "log_pushes": "Log every value sent to the charger"
+        },
+        "data_description": {
+          "car_soc_entity": "Your car's state of charge. Sent to the charger whenever it changes and used by the \"Use car SOC\" constraint.",
+          "home_battery_soc_entity": "Your home battery's state of charge. Required for the charger to accept any home battery data.",
+          "home_battery_amps_entity": "Your inverter's output current. Positive while the inverter injects, negative while it charges the battery, so pick a sensor that keeps the sign rather than an absolute value. Leave empty if you don't measure it.",
+          "home_battery_interval": "Warning: 30-60 seconds is fine for battery level alone, but if you picked an inverter current sensor above, set it to the fastest rate your system can afford. The charger follows that current to decide how much surplus goes to the car, so a slow feed makes it react late. 60 seconds is the maximum, because the charger discards the data after that.",
+          "log_pushes": "Troubleshooting only. Writes one line per send to Settings > System > Logs, so you can confirm what the charger receives. Leave off for normal use: at a short send interval this fills the log quickly."
         }
       }
     }
@@ -72,7 +83,7 @@
       "grid_current": { "name": "Grid current" },
       "price": { "name": "Electricity price" },
       "car_soc": { "name": "Car SOC" },
-      "powerwall_soc": { "name": "Powerwall SOC" },
+      "home_battery_soc": { "name": "Home battery SOC" },
       "pv_power": { "name": "PV power" },
       "rssi": { "name": "Wi-Fi signal" },
       "uptime": { "name": "Uptime" },
@@ -115,6 +126,32 @@
     "switch": {
       "charging_enabled": { "name": "Charging enabled" },
       "use_car_soc": { "name": "Use car SOC" }
+    }
+  },
+  "services": {
+    "set_car_soc": {
+      "name": "Set car SOC",
+      "description": "Sends the car's state of charge to the charger, for use as a charge constraint. Stays valid for 24 hours.",
+      "fields": {
+        "soc": {
+          "name": "State of charge",
+          "description": "Car state of charge in percent."
+        }
+      }
+    },
+    "set_home_battery_soc": {
+      "name": "Set home battery SOC",
+      "description": "Sends the home battery state of charge, and optionally its current, to the charger for use by solar charge mode. The charger discards this after 60 seconds, so repeat at least that often.",
+      "fields": {
+        "soc": {
+          "name": "State of charge",
+          "description": "Home battery state of charge in percent."
+        },
+        "amps": {
+          "name": "Inverter load current",
+          "description": "Signed inverter load current in amps (pw_amps_now): positive while injecting, negative while charging the battery. The charger treats anything below -2 A as no surplus for the car. Omit if you don't measure it."
+        }
+      }
     }
   }
 }

@@ -11,25 +11,32 @@ from homeassistant.config_entries import (
     OptionsFlow,
 )
 from homeassistant.core import callback
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.device_registry import format_mac
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
 from .api import AprEvseApi, AprEvseConnectionError
 from .const import (
-    AMPS_MAX_HARD,
     AMPS_MIN,
-    CONF_AMPS_MAX,
+    CONF_CAR_SOC_ENTITY,
     CONF_DEVICE_ID,
+    CONF_HOME_BATTERY_AMPS_ENTITY,
+    CONF_HOME_BATTERY_INTERVAL,
+    CONF_HOME_BATTERY_SOC_ENTITY,
     CONF_HOST,
+    CONF_LOG_PUSHES,
     CONF_MAC,
     CONF_NAME,
     CONF_PORT,
     CONF_SCAN_INTERVAL,
+    DEFAULT_HOME_BATTERY_INTERVAL,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
     DEVICE_TYPE,
     DOMAIN,
+    HOME_BATTERY_INTERVAL_MAX,
+    HOME_BATTERY_INTERVAL_MIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -147,13 +154,18 @@ class AprEvseConfigFlow(ConfigFlow, domain=DOMAIN):
         return AprEvseOptionsFlow()
 
 
+_SOURCE_SELECTOR = selector.EntitySelector(
+    selector.EntitySelectorConfig(domain=["sensor", "number", "input_number"])
+)
+
+
 class AprEvseOptionsFlow(OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
-            cleaned = {k: v for k, v in user_input.items() if v not in (None, 0)}
+            cleaned = {k: v for k, v in user_input.items() if v not in (None, "")}
             return self.async_create_entry(title="", data=cleaned)
 
         opts = self.config_entry.options
@@ -166,9 +178,39 @@ class AprEvseOptionsFlow(OptionsFlow):
                         default=opts.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
                     ): vol.All(int, vol.Range(min=5, max=600)),
                     vol.Optional(
-                        CONF_AMPS_MAX,
-                        default=opts.get(CONF_AMPS_MAX, 0),
-                    ): vol.All(int, vol.Range(min=0, max=AMPS_MAX_HARD)),
+                        CONF_CAR_SOC_ENTITY,
+                        description={
+                            "suggested_value": opts.get(CONF_CAR_SOC_ENTITY)
+                        },
+                    ): _SOURCE_SELECTOR,
+                    vol.Optional(
+                        CONF_HOME_BATTERY_SOC_ENTITY,
+                        description={
+                            "suggested_value": opts.get(CONF_HOME_BATTERY_SOC_ENTITY)
+                        },
+                    ): _SOURCE_SELECTOR,
+                    vol.Optional(
+                        CONF_HOME_BATTERY_AMPS_ENTITY,
+                        description={
+                            "suggested_value": opts.get(CONF_HOME_BATTERY_AMPS_ENTITY)
+                        },
+                    ): _SOURCE_SELECTOR,
+                    vol.Optional(
+                        CONF_HOME_BATTERY_INTERVAL,
+                        default=opts.get(
+                            CONF_HOME_BATTERY_INTERVAL, DEFAULT_HOME_BATTERY_INTERVAL
+                        ),
+                    ): vol.All(
+                        int,
+                        vol.Range(
+                            min=HOME_BATTERY_INTERVAL_MIN,
+                            max=HOME_BATTERY_INTERVAL_MAX,
+                        ),
+                    ),
+                    vol.Optional(
+                        CONF_LOG_PUSHES,
+                        default=opts.get(CONF_LOG_PUSHES, False),
+                    ): selector.BooleanSelector(),
                 }
             ),
             description_placeholders={"amps_min": str(AMPS_MIN)},

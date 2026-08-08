@@ -7,14 +7,14 @@
 # device name set at setup — check Settings → Devices & Services → APR EVSE →
 # any entity. Find/replace `apr_evse` with your slug if different.
 #
-# CONDITIONAL DATA: not every charger reports car / powerwall / PV. Those
+# CONDITIONAL DATA: not every charger reports car / home battery / PV. Those
 # sections use `visibility` conditions, so they disappear automatically on
 # devices that don't send that data — no broken cards. The Charging session
 # section only appears while a session is active.
 #
 # DIAGNOSTICS: the diagnostic entities (Wi-Fi signal, uptime, RAM, filesystem,
 # meter states, Cloud connected) are all enabled by default and grouped under
-# the device's Diagnostic section. The car/powerwall/PV sensors are enabled too
+# the device's Diagnostic section. The car/home battery/PV sensors are enabled too
 # but stay unavailable until the device reports that data.
 
 title: APR EVSE
@@ -170,23 +170,23 @@ views:
             entity: switch.apr_evse_use_car_soc
             name: Use car SOC
 
-      # ── Solar & Powerwall (only on chargers that report pw data) ────────
+      # ── Solar & home battery (only on chargers that report pw data) ─────
       - type: grid
         visibility:
           - condition: state
-            entity: sensor.apr_evse_powerwall_soc
+            entity: sensor.apr_evse_home_battery_soc
             state_not: unavailable
           - condition: state
-            entity: sensor.apr_evse_powerwall_soc
+            entity: sensor.apr_evse_home_battery_soc
             state_not: unknown
         cards:
           - type: heading
-            heading: Solar & Powerwall
+            heading: Solar & home battery
             heading_style: title
 
           - type: gauge
-            entity: sensor.apr_evse_powerwall_soc
-            name: Powerwall SOC
+            entity: sensor.apr_evse_home_battery_soc
+            name: Home battery SOC
             unit: "%"
             min: 0
             max: 100

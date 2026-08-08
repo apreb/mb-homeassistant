@@ -14,7 +14,11 @@ CONF_MAC: Final = "mac"
 CONF_DEVICE_ID: Final = "device_id"
 CONF_NAME: Final = "name"
 CONF_SCAN_INTERVAL: Final = "scan_interval"
-CONF_AMPS_MAX: Final = "amps_max"
+CONF_CAR_SOC_ENTITY: Final = "car_soc_entity"
+CONF_HOME_BATTERY_SOC_ENTITY: Final = "home_battery_soc_entity"
+CONF_HOME_BATTERY_AMPS_ENTITY: Final = "home_battery_amps_entity"
+CONF_HOME_BATTERY_INTERVAL: Final = "home_battery_interval"
+CONF_LOG_PUSHES: Final = "log_pushes"
 
 DEFAULT_PORT: Final = 80
 DEFAULT_SCAN_INTERVAL: Final = 30
@@ -23,6 +27,7 @@ WS_RECONNECT_BACKOFF: Final = (1, 2, 5, 10, 30)
 PATH_STATE: Final = "/api/state"
 PATH_CONFIG: Final = "/api/config"
 PATH_CONTROL: Final = "/api/control"
+PATH_EXT: Final = "/api/ext"
 PATH_WS: Final = "/ws"
 
 AMPS_MIN: Final = 6
@@ -34,6 +39,22 @@ CMD_PAMPS: Final = "pamps"
 CMD_MODE: Final = "mode"
 CMD_SCHEDULE: Final = "schedule"
 CMD_CAR_SOC: Final = "car_soc_toggle"
+
+EXT_CAR_SOC: Final = "car_soc"
+EXT_HOME_BATTERY: Final = "home_battery"
+
+SERVICE_SET_CAR_SOC: Final = "set_car_soc"
+SERVICE_SET_HOME_BATTERY_SOC: Final = "set_home_battery_soc"
+ATTR_SOC: Final = "soc"
+ATTR_AMPS: Final = "amps"
+
+EXT_FIELD_SOC: Final = "soc"
+EXT_FIELD_AMPS: Final = "pw_amps_now"
+HOME_BATTERY_AMPS_MIN: Final = -100
+HOME_BATTERY_AMPS_MAX: Final = 100
+DEFAULT_HOME_BATTERY_INTERVAL: Final = 30
+HOME_BATTERY_INTERVAL_MIN: Final = 1
+HOME_BATTERY_INTERVAL_MAX: Final = 60
 
 EVSE_STATE_STARTING: Final = (-2, 0)
 EVSE_STATE_CHARGING: Final = 3

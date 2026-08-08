@@ -9,6 +9,7 @@ import aiohttp
 from .const import (
     DEFAULT_PORT,
     PATH_CONTROL,
+    PATH_EXT,
     PATH_STATE,
     PATH_WS,
 )
@@ -67,6 +68,20 @@ class AprEvseApi:
                 return int(data.get("parsed", 0)) if isinstance(data, dict) else 0
         except (aiohttp.ClientError, asyncio.TimeoutError) as err:
             raise AprEvseConnectionError(f"control failed: {err}") from err
+
+    async def async_ext(self, topic: str, payload: dict[str, Any] | int | str) -> None:
+        kwargs: dict[str, Any] = (
+            {"json": payload} if isinstance(payload, dict) else {"data": str(payload)}
+        )
+        try:
+            async with self._session.post(
+                f"{self.base_url}{PATH_EXT}/{topic}",
+                timeout=self._timeout,
+                **kwargs,
+            ) as resp:
+                resp.raise_for_status()
+        except (aiohttp.ClientError, asyncio.TimeoutError) as err:
+            raise AprEvseConnectionError(f"ext/{topic} failed: {err}") from err
 
     async def async_ws_connect(self) -> aiohttp.ClientWebSocketResponse:
         try:

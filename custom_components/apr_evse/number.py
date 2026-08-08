@@ -11,7 +11,6 @@ from .const import (
     AMPS_MIN,
     CMD_AMPS,
     CMD_PAMPS,
-    CONF_AMPS_MAX,
     DOMAIN,
 )
 from .coordinator import AprEvseCoordinator
@@ -39,9 +38,6 @@ class _AprEvseAmpsNumber(AprEvseEntity, NumberEntity):
 
     @property
     def _ceiling(self) -> int:
-        override = self.coordinator.entry.options.get(CONF_AMPS_MAX)
-        if override:
-            return min(int(override), AMPS_MAX_HARD)
         cfg_max = self.cfg("evse").get("max_evse_amps")
         if isinstance(cfg_max, (int, float)) and cfg_max >= AMPS_MIN:
             return min(int(cfg_max), AMPS_MAX_HARD)

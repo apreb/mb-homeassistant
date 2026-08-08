@@ -17,6 +17,8 @@ from .const import (
     DOMAIN,
 )
 from .coordinator import AprEvseCoordinator
+from .mirror import AprEvseMirror
+from .services import async_setup_services, async_unload_services
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,6 +46,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator.start_ws()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    async_setup_services(hass)
+
+    mirror = AprEvseMirror(hass, entry, api)
+    await mirror.async_start()
+    entry.async_on_unload(mirror.async_stop)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
@@ -55,6 +62,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         coordinator: AprEvseCoordinator = hass.data[DOMAIN].pop(entry.entry_id)
         await coordinator.async_shutdown()
+        if not hass.data[DOMAIN]:
+            async_unload_services(hass)
     return unload_ok
 
 
