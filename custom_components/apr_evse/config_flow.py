@@ -20,20 +20,26 @@ from .api import AprEvseApi, AprEvseConnectionError
 from .const import (
     CONF_CAR_SOC_ENTITY,
     CONF_DEVICE_ID,
-    CONF_HOME_BATTERY_AMPS_ENTITY,
-    CONF_HOME_BATTERY_INTERVAL,
+    CONF_HOME_BATTERY_INVERT_POWER,
+    CONF_HOME_BATTERY_PHASES,
+    CONF_HOME_BATTERY_POWER_ENTITY,
+    CONF_HOME_BATTERY_POWER_ENTITY_L2,
+    CONF_HOME_BATTERY_POWER_ENTITY_L3,
     CONF_HOME_BATTERY_SOC_ENTITY,
+    CONF_HOME_BATTERY_VOLTAGE_ENTITY,
+    CONF_HOME_BATTERY_VOLTAGE_ENTITY_L2,
+    CONF_HOME_BATTERY_VOLTAGE_ENTITY_L3,
     CONF_HOST,
     CONF_LOG_PUSHES,
     CONF_MAC,
     CONF_NAME,
     CONF_PORT,
-    DEFAULT_HOME_BATTERY_INTERVAL,
+    DEFAULT_HOME_BATTERY_PHASES,
     DEFAULT_PORT,
     DEVICE_TYPE,
     DOMAIN,
-    HOME_BATTERY_INTERVAL_MAX,
-    HOME_BATTERY_INTERVAL_MIN,
+    HOME_BATTERY_PHASE_OPTIONS,
+    HOME_BATTERY_PHASES_THREE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -155,14 +161,35 @@ _SOURCE_SELECTOR = selector.EntitySelector(
     selector.EntitySelectorConfig(domain=["sensor", "number", "input_number"])
 )
 
+_PHASES_SELECTOR = selector.SelectSelector(
+    selector.SelectSelectorConfig(
+        options=HOME_BATTERY_PHASE_OPTIONS,
+        mode=selector.SelectSelectorMode.DROPDOWN,
+        translation_key="home_battery_phases",
+    )
+)
+
+
+def _picker(opts: dict[str, Any], key: str) -> Any:
+    return vol.Optional(key, description={"suggested_value": opts.get(key)})
+
 
 class AprEvseOptionsFlow(OptionsFlow):
+
+    def __init__(self) -> None:
+        self._main_input: dict[str, Any] = {}
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
             cleaned = {k: v for k, v in user_input.items() if v not in (None, "")}
+            if (
+                cleaned.get(CONF_HOME_BATTERY_PHASES) == HOME_BATTERY_PHASES_THREE
+                and cleaned.get(CONF_HOME_BATTERY_POWER_ENTITY)
+            ):
+                self._main_input = cleaned
+                return await self.async_step_phases()
             return self.async_create_entry(title="", data=cleaned)
 
         opts = self.config_entry.options
@@ -170,40 +197,50 @@ class AprEvseOptionsFlow(OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
+                    _picker(opts, CONF_CAR_SOC_ENTITY): _SOURCE_SELECTOR,
+                    _picker(opts, CONF_HOME_BATTERY_SOC_ENTITY): _SOURCE_SELECTOR,
+                    _picker(opts, CONF_HOME_BATTERY_POWER_ENTITY): _SOURCE_SELECTOR,
                     vol.Optional(
-                        CONF_CAR_SOC_ENTITY,
-                        description={
-                            "suggested_value": opts.get(CONF_CAR_SOC_ENTITY)
-                        },
-                    ): _SOURCE_SELECTOR,
+                        CONF_HOME_BATTERY_INVERT_POWER,
+                        default=opts.get(CONF_HOME_BATTERY_INVERT_POWER, False),
+                    ): selector.BooleanSelector(),
+                    _picker(opts, CONF_HOME_BATTERY_VOLTAGE_ENTITY): _SOURCE_SELECTOR,
                     vol.Optional(
-                        CONF_HOME_BATTERY_SOC_ENTITY,
-                        description={
-                            "suggested_value": opts.get(CONF_HOME_BATTERY_SOC_ENTITY)
-                        },
-                    ): _SOURCE_SELECTOR,
-                    vol.Optional(
-                        CONF_HOME_BATTERY_AMPS_ENTITY,
-                        description={
-                            "suggested_value": opts.get(CONF_HOME_BATTERY_AMPS_ENTITY)
-                        },
-                    ): _SOURCE_SELECTOR,
-                    vol.Optional(
-                        CONF_HOME_BATTERY_INTERVAL,
+                        CONF_HOME_BATTERY_PHASES,
                         default=opts.get(
-                            CONF_HOME_BATTERY_INTERVAL, DEFAULT_HOME_BATTERY_INTERVAL
+                            CONF_HOME_BATTERY_PHASES, DEFAULT_HOME_BATTERY_PHASES
                         ),
-                    ): vol.All(
-                        int,
-                        vol.Range(
-                            min=HOME_BATTERY_INTERVAL_MIN,
-                            max=HOME_BATTERY_INTERVAL_MAX,
-                        ),
-                    ),
+                    ): _PHASES_SELECTOR,
                     vol.Optional(
                         CONF_LOG_PUSHES,
                         default=opts.get(CONF_LOG_PUSHES, False),
                     ): selector.BooleanSelector(),
+                }
+            ),
+        )
+
+    async def async_step_phases(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        if user_input is not None:
+            cleaned = {k: v for k, v in user_input.items() if v not in (None, "")}
+            return self.async_create_entry(
+                title="", data={**self._main_input, **cleaned}
+            )
+
+        opts = self.config_entry.options
+        return self.async_show_form(
+            step_id="phases",
+            data_schema=vol.Schema(
+                {
+                    _picker(opts, CONF_HOME_BATTERY_POWER_ENTITY_L2): _SOURCE_SELECTOR,
+                    _picker(
+                        opts, CONF_HOME_BATTERY_VOLTAGE_ENTITY_L2
+                    ): _SOURCE_SELECTOR,
+                    _picker(opts, CONF_HOME_BATTERY_POWER_ENTITY_L3): _SOURCE_SELECTOR,
+                    _picker(
+                        opts, CONF_HOME_BATTERY_VOLTAGE_ENTITY_L3
+                    ): _SOURCE_SELECTOR,
                 }
             ),
         )

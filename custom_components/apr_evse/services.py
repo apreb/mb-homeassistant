@@ -13,14 +13,19 @@ from homeassistant.helpers import entity_registry as er
 from .api import AprEvseError
 from .const import (
     ATTR_AMPS,
+    ATTR_POWER,
     ATTR_SOC,
     DOMAIN,
     EXT_CAR_SOC,
-    EXT_FIELD_AMPS,
+    EXT_FIELD_CURRENT_AC,
+    EXT_FIELD_POWER_AC,
     EXT_FIELD_SOC,
     EXT_HOME_BATTERY,
+    EXT_SECTION_PW,
     HOME_BATTERY_AMPS_MAX,
     HOME_BATTERY_AMPS_MIN,
+    HOME_BATTERY_POWER_MAX,
+    HOME_BATTERY_POWER_MIN,
     SERVICE_SET_CAR_SOC,
     SERVICE_SET_HOME_BATTERY_SOC,
 )
@@ -42,6 +47,10 @@ HOME_BATTERY_SERVICE_SCHEMA = vol.Schema(
         vol.Optional(ATTR_AMPS): vol.All(
             vol.Coerce(float),
             vol.Range(min=HOME_BATTERY_AMPS_MIN, max=HOME_BATTERY_AMPS_MAX),
+        ),
+        vol.Optional(ATTR_POWER): vol.All(
+            vol.Coerce(int),
+            vol.Range(min=HOME_BATTERY_POWER_MIN, max=HOME_BATTERY_POWER_MAX),
         ),
     }
 )
@@ -106,10 +115,12 @@ def async_setup_services(hass: HomeAssistant) -> None:
         await _async_push(hass, call, EXT_CAR_SOC, call.data[ATTR_SOC])
 
     async def handle_set_home_battery_soc(call: ServiceCall) -> None:
-        payload: dict[str, Any] = {EXT_FIELD_SOC: call.data[ATTR_SOC]}
+        section: dict[str, Any] = {EXT_FIELD_SOC: call.data[ATTR_SOC]}
+        if ATTR_POWER in call.data:
+            section[EXT_FIELD_POWER_AC] = [call.data[ATTR_POWER], 0, 0]
         if ATTR_AMPS in call.data:
-            payload[EXT_FIELD_AMPS] = call.data[ATTR_AMPS]
-        await _async_push(hass, call, EXT_HOME_BATTERY, payload)
+            section[EXT_FIELD_CURRENT_AC] = [call.data[ATTR_AMPS], 0, 0]
+        await _async_push(hass, call, EXT_HOME_BATTERY, {EXT_SECTION_PW: section})
 
     hass.services.async_register(
         DOMAIN, SERVICE_SET_CAR_SOC, handle_set_car_soc, schema=CAR_SOC_SERVICE_SCHEMA

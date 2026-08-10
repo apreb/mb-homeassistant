@@ -15,8 +15,20 @@ CONF_DEVICE_ID: Final = "device_id"
 CONF_NAME: Final = "name"
 CONF_CAR_SOC_ENTITY: Final = "car_soc_entity"
 CONF_HOME_BATTERY_SOC_ENTITY: Final = "home_battery_soc_entity"
-CONF_HOME_BATTERY_AMPS_ENTITY: Final = "home_battery_amps_entity"
-CONF_HOME_BATTERY_INTERVAL: Final = "home_battery_interval"
+CONF_HOME_BATTERY_POWER_ENTITY: Final = "home_battery_power_entity"
+CONF_HOME_BATTERY_VOLTAGE_ENTITY: Final = "home_battery_voltage_entity"
+CONF_HOME_BATTERY_POWER_ENTITY_L2: Final = "home_battery_power_entity_l2"
+CONF_HOME_BATTERY_VOLTAGE_ENTITY_L2: Final = "home_battery_voltage_entity_l2"
+CONF_HOME_BATTERY_POWER_ENTITY_L3: Final = "home_battery_power_entity_l3"
+CONF_HOME_BATTERY_VOLTAGE_ENTITY_L3: Final = "home_battery_voltage_entity_l3"
+CONF_HOME_BATTERY_INVERT_POWER: Final = "home_battery_invert_power"
+CONF_HOME_BATTERY_PHASES: Final = "home_battery_phases"
+HOME_BATTERY_PHASE_KEYS: Final[tuple[tuple[str, str], ...]] = (
+    (CONF_HOME_BATTERY_POWER_ENTITY, CONF_HOME_BATTERY_VOLTAGE_ENTITY),
+    (CONF_HOME_BATTERY_POWER_ENTITY_L2, CONF_HOME_BATTERY_VOLTAGE_ENTITY_L2),
+    (CONF_HOME_BATTERY_POWER_ENTITY_L3, CONF_HOME_BATTERY_VOLTAGE_ENTITY_L3),
+)
+LEGACY_CONF_HOME_BATTERY_AMPS_ENTITY: Final = "home_battery_amps_entity"
 CONF_LOG_PUSHES: Final = "log_pushes"
 
 DEFAULT_PORT: Final = 80
@@ -46,14 +58,26 @@ SERVICE_SET_CAR_SOC: Final = "set_car_soc"
 SERVICE_SET_HOME_BATTERY_SOC: Final = "set_home_battery_soc"
 ATTR_SOC: Final = "soc"
 ATTR_AMPS: Final = "amps"
+ATTR_POWER: Final = "power"
 
+EXT_SECTION_PW: Final = "pw"
 EXT_FIELD_SOC: Final = "soc"
-EXT_FIELD_AMPS: Final = "pw_amps_now"
+EXT_FIELD_POWER_AC: Final = "p_ac"
+EXT_FIELD_VOLTAGE_AC: Final = "v_ac"
+EXT_FIELD_CURRENT_AC: Final = "i_ac"
 HOME_BATTERY_AMPS_MIN: Final = -100
 HOME_BATTERY_AMPS_MAX: Final = 100
-DEFAULT_HOME_BATTERY_INTERVAL: Final = 5
-HOME_BATTERY_INTERVAL_MIN: Final = 1
-HOME_BATTERY_INTERVAL_MAX: Final = 60
+HOME_BATTERY_POWER_MIN: Final = -32768
+HOME_BATTERY_POWER_MAX: Final = 32767
+HOME_BATTERY_VOLTAGE_MIN: Final = 50
+HOME_BATTERY_VOLTAGE_MAX: Final = 300
+DEFAULT_HOME_BATTERY_PHASES: Final = "1"
+HOME_BATTERY_PHASES_THREE: Final = "3"
+HOME_BATTERY_PHASE_OPTIONS: Final[list[str]] = [
+    DEFAULT_HOME_BATTERY_PHASES,
+    HOME_BATTERY_PHASES_THREE,
+]
+MIN_HOME_BATTERY_PUSH_SPACING: Final = 1.0
 
 EVSE_STATE_STARTING: Final = (-2, 0)
 EVSE_STATE_CHARGING: Final = 3

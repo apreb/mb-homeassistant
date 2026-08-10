@@ -39,3 +39,12 @@ set_home_battery_soc:
           max: 100
           step: 0.1
           unit_of_measurement: A
+    power:
+      required: false
+      example: 3500
+      selector:
+        number:
+          min: -32768
+          max: 32767
+          step: 1
+          unit_of_measurement: W

@@ -27,20 +27,40 @@
   "options": {
     "step": {
       "init": {
-        "description": "The sensors below are optional: pick them and this charger receives their values automatically.",
+        "description": "The sensors below are optional: pick them and this charger receives their values automatically, every time they refresh in Home Assistant.",
         "data": {
           "car_soc_entity": "Car battery level (%)",
           "home_battery_soc_entity": "Home battery level (%)",
-          "home_battery_amps_entity": "Inverter current (A, signed)",
-          "home_battery_interval": "Home battery send interval (seconds)",
+          "home_battery_power_entity": "Inverter power (W, signed)",
+          "home_battery_invert_power": "Invert the inverter power sign",
+          "home_battery_voltage_entity": "Inverter AC voltage (V)",
+          "home_battery_phases": "Inverter phases",
           "log_pushes": "Log every value sent to the charger"
         },
         "data_description": {
           "car_soc_entity": "Your car's state of charge. Sent to the charger whenever it changes and used by the \"Use car SOC\" constraint.",
           "home_battery_soc_entity": "Your home battery's state of charge. Required for the charger to accept any home battery data.",
-          "home_battery_amps_entity": "Your inverter's output AC current. Positive while the inverter injects, negative while it charges the battery, so pick a sensor that keeps the sign rather than an absolute value. Leave empty if you don't measure it.",
-          "home_battery_interval": "Battery level alone: 30-60 seconds is fine. If you send inverter current, set it to the same rate as sensor polling and try to configure them as fast as possible. The charger follows that current to decide how much surplus goes to the car, a slow feed makes it react late. 60 seconds is the maximum, because the charger discards the data after that.",
-          "log_pushes": "Troubleshooting only. Writes one line per send to Settings > System > Logs, so you can confirm what the charger receives. Leave off for normal use: at a short send interval this fills the log quickly."
+          "home_battery_power_entity": "Your inverter's AC output power, or phase 1's on a three-phase inverter. Positive while the inverter injects, negative while it charges the battery, so pick a sensor that keeps the sign rather than an absolute value. It also sets the pace: the whole home battery set is sent every time this sensor refreshes, so the faster it polls the better the charger follows your surplus. The charger discards the data 60 seconds after the last one, so anything slower than that leaves gaps. Leave empty if you don't measure it, then the battery level sets the pace instead.",
+          "home_battery_invert_power": "Turn on if your sensor reads negative while the inverter injects and positive while it draws. The charger expects the opposite: positive = injecting, negative = consuming. Check the log option below after switching it: with the sun up and the battery full, the power sent should be positive.",
+          "home_battery_voltage_entity": "Your inverter's AC voltage. The charger divides the power above by it to get the current its solar logic runs on. Pick the grid/AC side, not a DC battery or string voltage: readings outside 50-300 V are ignored (so not 400 V line-to-line either). Without it only power is sent and solar charging cannot follow your surplus.",
+          "home_battery_phases": "Pick 3 for a three-phase inverter. The next page then asks for the phase 2 and 3 sensors, and the two above count as phase 1. Each phase needs its own voltage: that is what tells the charger the phase is really there.",
+          "log_pushes": "Troubleshooting only. Writes one line per send to Settings > System > Logs, so you can confirm what the charger receives. Leave off for normal use: with a fast inverter sensor this fills the log quickly."
+        }
+      },
+      "phases": {
+        "title": "Three-phase inverter",
+        "description": "The sensors you already picked are phase 1. Add the other two phases here; each needs its own power and voltage, because a current only means anything per phase. Leave a phase empty if you don't measure it, the charger then treats the feed as single phase.",
+        "data": {
+          "home_battery_power_entity_l2": "Phase 2 power (W, signed)",
+          "home_battery_voltage_entity_l2": "Phase 2 AC voltage (V)",
+          "home_battery_power_entity_l3": "Phase 3 power (W, signed)",
+          "home_battery_voltage_entity_l3": "Phase 3 AC voltage (V)"
+        },
+        "data_description": {
+          "home_battery_power_entity_l2": "Same sign convention and invert setting as phase 1.",
+          "home_battery_voltage_entity_l2": "Phase-to-neutral voltage of phase 2, 50-300 V. Required for the charger to count phase 2 at all.",
+          "home_battery_power_entity_l3": "Same sign convention and invert setting as phase 1.",
+          "home_battery_voltage_entity_l3": "Phase-to-neutral voltage of phase 3, 50-300 V. Required for the charger to count phase 3 at all."
         }
       }
     }
@@ -140,7 +160,7 @@
     },
     "set_home_battery_soc": {
       "name": "Set home battery SOC",
-      "description": "Sends the home battery state of charge, and optionally its current, to the charger for use by solar charge mode. The charger discards this after 60 seconds, so repeat at least that often.",
+      "description": "Sends the home battery state of charge, and optionally its current and power, to the charger for use by solar charge mode. The charger discards this after 60 seconds, so repeat at least that often.",
       "fields": {
         "soc": {
           "name": "State of charge",
@@ -148,8 +168,20 @@
         },
         "amps": {
           "name": "Inverter load current",
-          "description": "Signed inverter load current in amps (pw_amps_now): positive while injecting, negative while charging the battery. The charger treats anything below -2 A as no surplus for the car. Omit if you don't measure it."
+          "description": "Signed phase 1 AC current in amps (i_ac): positive while injecting, negative while charging the battery. The charger treats anything below -2 A as no surplus for the car. Only send this if you measure current directly; otherwise send power and let the charger derive it. Omit if you don't measure it."
+        },
+        "power": {
+          "name": "Inverter load power",
+          "description": "Signed phase 1 AC power in watts (p_ac), same sign convention as the current. Omit if you don't measure it."
         }
+      }
+    }
+  },
+  "selector": {
+    "home_battery_phases": {
+      "options": {
+        "1": "Single phase",
+        "3": "Three phase (a sensor pair per phase)"
       }
     }
   }
