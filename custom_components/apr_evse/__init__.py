@@ -8,14 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import AprEvseApi
-from .const import (
-    CONF_HOST,
-    CONF_PORT,
-    CONF_SCAN_INTERVAL,
-    DEFAULT_PORT,
-    DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-)
+from .const import CONF_HOST, CONF_PORT, DEFAULT_PORT, DOMAIN
 from .coordinator import AprEvseCoordinator
 from .mirror import AprEvseMirror
 from .services import async_setup_services, async_unload_services
@@ -39,8 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         port=entry.data.get(CONF_PORT, DEFAULT_PORT),
     )
 
-    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-    coordinator = AprEvseCoordinator(hass, entry, api, scan_interval)
+    coordinator = AprEvseCoordinator(hass, entry, api)
 
     await coordinator.async_config_entry_first_refresh()
     coordinator.start_ws()

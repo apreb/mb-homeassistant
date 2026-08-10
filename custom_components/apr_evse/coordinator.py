@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import AprEvseApi, AprEvseConnectionError
-from .const import DOMAIN, WS_RECONNECT_BACKOFF
+from .const import DOMAIN, SCAN_INTERVAL, WS_RECONNECT_BACKOFF
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,13 +34,12 @@ class AprEvseCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         hass: HomeAssistant,
         entry: ConfigEntry,
         api: AprEvseApi,
-        scan_interval: int,
     ) -> None:
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=scan_interval),
+            update_interval=timedelta(seconds=SCAN_INTERVAL),
         )
         self.entry = entry
         self.api = api

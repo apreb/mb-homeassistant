@@ -27,19 +27,20 @@
   "options": {
     "step": {
       "init": {
-        "description": "WebSocket push is used for live updates; the poll interval is the fallback when the socket is down. Charging-current minimum is {amps_min} A.\n\nThe sensors below are optional: pick them and this charger receives their values automatically, no automation needed. Values are sent as soon as a sensor changes; the home battery send interval only sets how often they are repeated.",
+        "description": "The sensors below are optional: pick them and this charger receives their values automatically.",
         "data": {
-          "scan_interval": "Poll fallback interval (seconds)",
           "car_soc_entity": "Car battery level (%)",
           "home_battery_soc_entity": "Home battery level (%)",
           "home_battery_amps_entity": "Inverter current (A, signed)",
-          "home_battery_interval": "Home battery send interval (seconds)"
+          "home_battery_interval": "Home battery send interval (seconds)",
+          "log_pushes": "Log every value sent to the charger"
         },
         "data_description": {
           "car_soc_entity": "Your car's state of charge. Sent to the charger whenever it changes and used by the \"Use car SOC\" constraint.",
           "home_battery_soc_entity": "Your home battery's state of charge. Required for the charger to accept any home battery data.",
-          "home_battery_amps_entity": "Your inverter's output current. Positive while the inverter injects, negative while it charges the battery, so pick a sensor that keeps the sign rather than an absolute value. Leave empty if you don't measure it.",
-          "home_battery_interval": "Warning: 30-60 seconds is fine for battery level alone, but set 1-5 seconds if you picked an inverter current sensor above. The charger follows that current to decide how much surplus goes to the car, so a slow feed makes it react late. 60 seconds is the maximum, because the charger discards the data after that."
+          "home_battery_amps_entity": "Your inverter's output AC current. Positive while the inverter injects, negative while it charges the battery, so pick a sensor that keeps the sign rather than an absolute value. Leave empty if you don't measure it.",
+          "home_battery_interval": "Battery level alone: 30-60 seconds is fine. If you send inverter current, set it to the same rate as sensor polling and try to configure them as fast as possible. The charger follows that current to decide how much surplus goes to the car, a slow feed makes it react late. 60 seconds is the maximum, because the charger discards the data after that.",
+          "log_pushes": "Troubleshooting only. Writes one line per send to Settings > System > Logs, so you can confirm what the charger receives. Leave off for normal use: at a short send interval this fills the log quickly."
         }
       }
     }

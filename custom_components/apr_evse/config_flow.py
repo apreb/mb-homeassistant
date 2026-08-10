@@ -18,7 +18,6 @@ from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
 from .api import AprEvseApi, AprEvseConnectionError
 from .const import (
-    AMPS_MIN,
     CONF_CAR_SOC_ENTITY,
     CONF_DEVICE_ID,
     CONF_HOME_BATTERY_AMPS_ENTITY,
@@ -29,10 +28,8 @@ from .const import (
     CONF_MAC,
     CONF_NAME,
     CONF_PORT,
-    CONF_SCAN_INTERVAL,
     DEFAULT_HOME_BATTERY_INTERVAL,
     DEFAULT_PORT,
-    DEFAULT_SCAN_INTERVAL,
     DEVICE_TYPE,
     DOMAIN,
     HOME_BATTERY_INTERVAL_MAX,
@@ -174,10 +171,6 @@ class AprEvseOptionsFlow(OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Optional(
-                        CONF_SCAN_INTERVAL,
-                        default=opts.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
-                    ): vol.All(int, vol.Range(min=5, max=600)),
-                    vol.Optional(
                         CONF_CAR_SOC_ENTITY,
                         description={
                             "suggested_value": opts.get(CONF_CAR_SOC_ENTITY)
@@ -213,5 +206,4 @@ class AprEvseOptionsFlow(OptionsFlow):
                     ): selector.BooleanSelector(),
                 }
             ),
-            description_placeholders={"amps_min": str(AMPS_MIN)},
         )
