@@ -6,16 +6,6 @@
 # ENTITY IDs: this assumes a device slug of `apr_evse`. Yours depends on the
 # device name set at setup — check Settings → Devices & Services → APR EVSE →
 # any entity. Find/replace `apr_evse` with your slug if different.
-#
-# CONDITIONAL DATA: not every charger reports car / home battery / PV. Those
-# sections use `visibility` conditions, so they disappear automatically on
-# devices that don't send that data — no broken cards. The Charging session
-# section only appears while a session is active.
-#
-# DIAGNOSTICS: the diagnostic entities (Wi-Fi signal, uptime, RAM, filesystem,
-# meter states, Cloud connected) are all enabled by default and grouped under
-# the device's Diagnostic section. The car/home battery/PV sensors are enabled too
-# but stay unavailable until the device reports that data.
 
 title: APR EVSE
 views:
@@ -30,26 +20,21 @@ views:
           - type: heading
             heading: Status & control
             heading_style: title
-
           - type: tile
             entity: sensor.apr_evse_status
             name: Status
-
           - type: tile
             entity: binary_sensor.apr_evse_vehicle_connected
             name: Vehicle
             color: blue
-
           - type: tile
             entity: binary_sensor.apr_evse_charging
             name: Charging
             color: green
-
           - type: tile
             entity: binary_sensor.apr_evse_fault
             name: Fault
             color: red
-
           - type: entities
             title: Controls
             show_header_toggle: false
@@ -72,7 +57,6 @@ views:
           - type: heading
             heading: Live
             heading_style: title
-
           - type: gauge
             entity: sensor.apr_evse_charging_power
             name: Charging power
@@ -84,63 +68,40 @@ views:
               green: 1
               yellow: 0
               red: 0
-
           - type: tile
             entity: sensor.apr_evse_voltage
             name: Voltage
-
           - type: tile
             entity: sensor.apr_evse_current
             name: Current
-
           - type: tile
             entity: sensor.apr_evse_temperature
             name: Temperature
 
-          - type: tile
-            entity: sensor.apr_evse_grid_power
-            name: Grid power
-
-          - type: tile
-            entity: sensor.apr_evse_grid_voltage
-            name: Grid voltage
-
-          - type: tile
-            entity: sensor.apr_evse_grid_current
-            name: Grid current
-
-          - type: tile
-            entity: sensor.apr_evse_electricity_price
-            name: Price
-
-      # ── Charging session (visible only while charging) ──────────────────
+      # ── Charging session ────────────────────────────────────────────────────
       - type: grid
         visibility:
           - condition: state
             entity: binary_sensor.apr_evse_charging
-            state: "on"
+            state: 'on'
         cards:
           - type: heading
             heading: Charging session
             heading_style: title
-
           - type: tile
             entity: sensor.apr_evse_session_energy
             name: Energy
-
           - type: tile
             entity: sensor.apr_evse_session_duration
             name: Duration
-
           - type: tile
             entity: sensor.apr_evse_session_cost
             name: Cost
-
           - type: tile
             entity: sensor.apr_evse_range_added
             name: Range added
 
-      # ── Car (only on chargers that report car SOC) ──────────────────────
+      # ── Car data ────────────────────────────────────────────────────
       - type: grid
         visibility:
           - condition: state
@@ -153,11 +114,10 @@ views:
           - type: heading
             heading: Car
             heading_style: title
-
           - type: gauge
             entity: sensor.apr_evse_car_soc
             name: Car SOC
-            unit: "%"
+            unit: '%'
             min: 0
             max: 100
             needle: true
@@ -165,12 +125,38 @@ views:
               red: 0
               yellow: 20
               green: 60
-
           - type: tile
             entity: switch.apr_evse_use_car_soc
             name: Use car SOC
 
-      # ── Solar & home battery (only on chargers that report pw data) ─────
+      # ── Grid data ────────────────────────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Grid
+            heading_style: title
+          - type: gauge
+            entity: sensor.apr_evse_grid_power
+            name: Grid Power
+            unit: W
+            min: -10000
+            max: 10000
+            needle: true
+            severity:
+              green: 0
+              yellow: -10000
+              red: 7000
+          - type: tile
+            entity: sensor.apr_evse_grid_voltage
+            name: Grid voltage
+          - type: tile
+            entity: sensor.apr_evse_grid_current
+            name: Grid current
+          - type: tile
+            entity: sensor.apr_evse_electricity_price
+            name: Price
+
+      # ── Home battery ────────────────────────────────────────────────────
       - type: grid
         visibility:
           - condition: state
@@ -181,13 +167,12 @@ views:
             state_not: unknown
         cards:
           - type: heading
-            heading: Solar & home battery
+            heading: Home battery
             heading_style: title
-
           - type: gauge
             entity: sensor.apr_evse_home_battery_soc
             name: Home battery SOC
-            unit: "%"
+            unit: '%'
             min: 0
             max: 100
             needle: true
@@ -195,22 +180,19 @@ views:
               red: 0
               yellow: 20
               green: 60
-
           - type: tile
             entity: sensor.apr_evse_inverter_power
             name: Inverter power
-
           - type: tile
             entity: sensor.apr_evse_inverter_current
             name: Inverter current
 
-      # ── Diagnostics (enable these entities on the device page first) ────
+      # ── Diagnostics ────────────────────────────────────────────────────
       - type: grid
         cards:
           - type: heading
             heading: Diagnostics
             heading_style: subtitle
-
           - type: entities
             show_header_toggle: false
             entities:
