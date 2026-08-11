@@ -197,8 +197,12 @@ views:
               green: 60
 
           - type: tile
-            entity: sensor.apr_evse_pv_power
-            name: PV power
+            entity: sensor.apr_evse_inverter_power
+            name: Inverter power
+
+          - type: tile
+            entity: sensor.apr_evse_inverter_current
+            name: Inverter current
 
       # ── Diagnostics (enable these entities on the device page first) ────
       - type: grid
