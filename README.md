@@ -15,6 +15,7 @@ Local-push HACS custom integration for the APR EVSE smart charger. Talks to the 
 
 - Snapshot via `GET /api/state` (REST); live deltas via `/ws`. The WS on-connect push is truncated by firmware, so REST is always the source of truth.
 - `state.car` / `state.pw` / `state.charge` are conditional: their entities go `unavailable` when the device omits the section.
+- Two TCP connections per charger, no more: the WebSocket, and one keep-alive socket every REST call and data push queues on.
 
 ## Push data to the charger
 
@@ -26,7 +27,7 @@ Settings → Devices & Services → APR EVSE → **Configure**, then pick:
 
 | Option | Feeds | Pushed |
 |---|---|---|
-| Car battery level (%) | Car SOC constraint (`Use car SOC` switch) | on refresh; valid 24 h |
+| Car battery level (%) | Car SOC constraint (`Use car SOC` switch) | on change of whole %, plus hourly; valid 24 h |
 | Home battery level (%) | Home battery SOC for solar charge mode | with the inverter power |
 | Inverter power (W, signed) | Inverter AC power, and the current the charger derives from it | on refresh — sets the pace for the whole set |
 | Invert the inverter power sign | Flips the sign of every power sensor before it is sent | — |

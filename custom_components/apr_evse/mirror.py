@@ -18,6 +18,7 @@ from homeassistant.helpers.event import (
 
 from .api import AprEvseApi, AprEvseError
 from .const import (
+    CAR_SOC_REFRESH_INTERVAL,
     CONF_CAR_SOC_ENTITY,
     CONF_HOME_BATTERY_INVERT_POWER,
     CONF_HOME_BATTERY_PHASES,
@@ -75,6 +76,8 @@ class AprEvseMirror:
             (power for power, _ in self._phase_entities if power), self._soc_entity
         )
         self._last_home_battery_push = float("-inf")
+        self._last_car_soc: int | None = None
+        self._last_car_push = float("-inf")
         self._log_level = logging.INFO if opts.get(CONF_LOG_PUSHES) else logging.DEBUG
         self._unsubs: list[Any] = []
 
@@ -135,8 +138,18 @@ class AprEvseMirror:
     async def _async_push_car(self) -> None:
         soc = self._value(self._car_entity)
         if soc is None:
+            self._last_car_soc = None
             return
-        await self._async_send(EXT_CAR_SOC, int(_clamp(soc, 0, 100)))
+        percent = int(_clamp(soc, 0, 100))
+        now = self.hass.loop.time()
+        if (
+            percent == self._last_car_soc
+            and now - self._last_car_push < CAR_SOC_REFRESH_INTERVAL
+        ):
+            return
+        if await self._async_send(EXT_CAR_SOC, percent):
+            self._last_car_soc = percent
+            self._last_car_push = now
 
     async def _async_push_home_battery(self) -> None:
         now = self.hass.loop.time()
@@ -198,7 +211,7 @@ class AprEvseMirror:
             return None, v_ac
         return p_ac, v_ac
 
-    async def _async_send(self, topic: str, payload: dict[str, Any] | int) -> None:
+    async def _async_send(self, topic: str, payload: dict[str, Any] | int) -> bool:
         try:
             await self.api.async_ext(topic, payload)
         except AprEvseError as err:
@@ -210,10 +223,9 @@ class AprEvseMirror:
                 payload,
                 err,
             )
-        else:
-            _LOGGER.log(
-                self._log_level, "%s ext/%s %s", self._log_name, topic, payload
-            )
+            return False
+        _LOGGER.log(self._log_level, "%s ext/%s %s", self._log_name, topic, payload)
+        return True
 
 
     async def _handle_state_change(self, event: Event[EventStateChangedData]) -> None:

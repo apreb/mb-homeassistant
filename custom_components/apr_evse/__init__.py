@@ -2,13 +2,20 @@ from __future__ import annotations
 
 import logging
 
+import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import AprEvseApi
-from .const import CONF_HOST, CONF_PORT, DEFAULT_PORT, DOMAIN
+from .const import (
+    CONF_HOST,
+    CONF_PORT,
+    DEFAULT_PORT,
+    DOMAIN,
+    KEEPALIVE_TIMEOUT,
+    MAX_DEVICE_CONNECTIONS,
+)
 from .coordinator import AprEvseCoordinator
 from .mirror import AprEvseMirror
 from .services import async_setup_services, async_unload_services
@@ -25,7 +32,14 @@ PLATFORMS: list[Platform] = [
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    session = async_get_clientsession(hass)
+    connector = aiohttp.TCPConnector(
+        limit=MAX_DEVICE_CONNECTIONS,
+        limit_per_host=MAX_DEVICE_CONNECTIONS,
+        keepalive_timeout=KEEPALIVE_TIMEOUT,
+    )
+    session = aiohttp.ClientSession(connector=connector)
+    entry.async_on_unload(session.close)
+
     api = AprEvseApi(
         session,
         host=entry.data[CONF_HOST],
